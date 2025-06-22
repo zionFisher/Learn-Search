@@ -13,6 +13,7 @@ Shader "Custom/Grids"
         _GridThickness ("Grid Thickness", Range(0.001, 0.1)) = 0.01
         _HighlightColor ("Highlight Color", Color) = (1, 1, 0, 1)
         _HighlightThickness ("Highlight Thickness", Range(0.001, 0.1)) = 0.03
+        [HideInInspector] _MapSizeSum ("Map Size Sum", Float) = 20
     }
 
     SubShader
@@ -59,6 +60,7 @@ Shader "Custom/Grids"
                 float _GridThickness;
                 float4 _HighlightColor;
                 float _HighlightThickness;
+                float _MapSizeSum;
             CBUFFER_END
 
             StructuredBuffer<int> _CellTypes;
@@ -122,7 +124,8 @@ Shader "Custom/Grids"
 
                 // 计算网格线
                 float2 gridUV = frac(input.uv * float2(_GridWidth, _GridHeight));
-                float2 grid = step(1.0 - _GridThickness, gridUV) + step(gridUV, float2(_GridThickness, _GridThickness));
+                float adjustedThickness = _GridThickness * min(max(_MapSizeSum, 2.0) / 20.0, 2.5); // 根据地图大小调整线宽
+                float2 grid = step(1.0 - adjustedThickness, gridUV) + step(gridUV, float2(adjustedThickness, adjustedThickness));
                 float isGrid = saturate(grid.x + grid.y);
 
                 // 计算高亮边框
@@ -157,10 +160,10 @@ Shader "Custom/Grids"
 
                 // 计算边界高亮
                 float2 edgeHighlight = float2(
-                    (cellUV.x > (1.0 - _GridThickness) && neighborHighlights.x) ||
-                    (cellUV.x < _GridThickness && neighborHighlights.y),
-                    (cellUV.y > (1.0 - _GridThickness) && neighborHighlights.z) ||
-                    (cellUV.y < _GridThickness && neighborHighlights.w)
+                    (cellUV.x > (1.0 - adjustedThickness) && neighborHighlights.x) ||
+                    (cellUV.x < adjustedThickness && neighborHighlights.y),
+                    (cellUV.y > (1.0 - adjustedThickness) && neighborHighlights.z) ||
+                    (cellUV.y < adjustedThickness && neighborHighlights.w)
                 );
 
                 // 计算顶点高亮（对角相交处）
@@ -171,10 +174,10 @@ Shader "Custom/Grids"
 
                 // 检查是否在角落的正方形区域内
                 float4 corners = float4(
-                    all(float2(cellUV.x >= (1.0 - _GridThickness), cellUV.y >= (1.0 - _GridThickness))), // 右上
-                    all(float2(cellUV.x <= _GridThickness, cellUV.y >= (1.0 - _GridThickness))), // 左上
-                    all(float2(cellUV.x >= (1.0 - _GridThickness), cellUV.y <= _GridThickness)), // 右下
-                    all(float2(cellUV.x <= _GridThickness, cellUV.y <= _GridThickness))  // 左下
+                    all(float2(cellUV.x >= (1.0 - adjustedThickness), cellUV.y >= (1.0 - adjustedThickness))), // 右上
+                    all(float2(cellUV.x <= adjustedThickness, cellUV.y >= (1.0 - adjustedThickness))), // 左上
+                    all(float2(cellUV.x >= (1.0 - adjustedThickness), cellUV.y <= adjustedThickness)), // 右下
+                    all(float2(cellUV.x <= adjustedThickness, cellUV.y <= adjustedThickness))  // 左下
                 );
 
                 float4 cornerHighlights = corners * diagonalHighlights;
@@ -185,8 +188,8 @@ Shader "Custom/Grids"
                 // 如果当前格子是高亮的，使用完整边框
                 if (isHighlighted == 1)
                 {
-                    float2 highlightBorder = step(1.0 - _GridThickness, cellUV) +
-                                           step(cellUV, float2(_GridThickness, _GridThickness));
+                    float2 highlightBorder = step(1.0 - adjustedThickness, cellUV) +
+                                           step(cellUV, float2(adjustedThickness, adjustedThickness));
                     isHighlightBorder = saturate(highlightBorder.x + highlightBorder.y);
                 }
 

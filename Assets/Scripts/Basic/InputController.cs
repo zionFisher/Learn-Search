@@ -18,8 +18,9 @@ public class InputController : MonoBehaviour
     [SerializeField] private TMP_InputField heightInput;
     [SerializeField] private Button resizeButton;
     [SerializeField] private Button resetButton;
+    [SerializeField] private TMP_Text mapSizeText;
     [SerializeField] private Slider brushSizeSlider;
-    [SerializeField] private TextMeshProUGUI brushSizeText;
+    [SerializeField] private TMP_Text brushSizeText;
     [SerializeField] private Toggle floorToggle;
     [SerializeField] private Toggle blockToggle;
     [SerializeField] private Toggle startToggle;
@@ -76,13 +77,15 @@ public class InputController : MonoBehaviour
         }
         OnReachabilityToggleValueChanged(true);
 
-        // 先创建 MapController
+        // 创建 MapController
         mapController = new MapController(defaultWidth, defaultHeight, mapGrid);
 
-        // 然后订阅事件
+        // 订阅事件
         mapController.onMapSizeChange += UpdateCamera;
+        mapController.onMapSizeChange += UpdateMapSizeText;
+        mapController.onMapSizeChange();
 
-        // 最后设置按钮监听
+        // 设置按钮监听
         resetButton.onClick.AddListener(ResetToDefault);
         resizeButton.onClick.AddListener(ResizeMap);
 
@@ -222,6 +225,11 @@ public class InputController : MonoBehaviour
         if (startToggle.isOn) return CellType.Start;
         if (endToggle.isOn) return CellType.End;
         return null;
+    }
+
+    private void UpdateMapSizeText()
+    {
+        mapSizeText.text = $"Size:{mapController.MapSize.x}x{mapController.MapSize.y}";
     }
 
     private void OnSelectedCellTypeChanged(bool isOn)

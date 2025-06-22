@@ -115,8 +115,9 @@ Material:
     - _GlossyReflections: 0
     - _GridAntialias: 0.001
     - _GridLineWidth: 0.1
-    - _GridThickness: 0.05
-    - _HighlightThickness: 0.05
+    - _GridThickness: 0.04
+    - _HighlightThickness: 0.04
+    - _MapSizeSum: 34
     - _Metallic: 0
     - _MinGridLineWidth: 0.0022
     - _OcclusionStrength: 1

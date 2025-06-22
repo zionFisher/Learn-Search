@@ -50,6 +50,9 @@ public class MapGrid : MonoBehaviour
 
         // 更新单元格类型数据
         UpdateCellTypes(cells);
+
+        // 更新地图尺寸和
+        gridMaterial.SetFloat("_MapSizeSum", size.x + size.y);
     }
 
     public void UpdateHighlight(int[] highlightData, CellType highlightType)
