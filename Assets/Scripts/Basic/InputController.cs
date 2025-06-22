@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class InputController : MonoBehaviour
 {
@@ -18,10 +19,12 @@ public class InputController : MonoBehaviour
     [SerializeField] private Button resizeButton;
     [SerializeField] private Button resetButton;
     [SerializeField] private Slider brushSizeSlider;
+    [SerializeField] private TextMeshProUGUI brushSizeText;
     [SerializeField] private Toggle floorToggle;
     [SerializeField] private Toggle blockToggle;
     [SerializeField] private Toggle startToggle;
     [SerializeField] private Toggle endToggle;
+    [SerializeField] private GameObject reachability;
 
     [Header("相机设置")]
     [SerializeField] private Camera mainCamera;
@@ -50,13 +53,28 @@ public class InputController : MonoBehaviour
             }
         }
 
-        // 设置画刷大小滑块的范围
+        // 设置cell type
+        floorToggle.onValueChanged.AddListener(OnSelectedCellTypeChanged);
+        blockToggle.onValueChanged.AddListener(OnSelectedCellTypeChanged);
+        startToggle.onValueChanged.AddListener(OnSelectedCellTypeChanged);
+        endToggle.onValueChanged.AddListener(OnSelectedCellTypeChanged);
+
+        // 设置画刷
         if (brushSizeSlider != null)
         {
             brushSizeSlider.minValue = 1;
             brushSizeSlider.maxValue = 5; // 最大5层网格
             brushSizeSlider.wholeNumbers = true; // 只允许整数值
+            brushSizeSlider.onValueChanged.AddListener(OnBrushSizeSliderValueChanged);
         }
+
+        // 初始化reachability
+        Transform toggles = reachability.transform.GetChild(1);
+        foreach (Transform child in toggles)
+        {
+            child.GetComponent<Toggle>().onValueChanged.AddListener(OnReachabilityToggleValueChanged);
+        }
+        OnReachabilityToggleValueChanged(true);
 
         // 先创建 MapController
         mapController = new MapController(defaultWidth, defaultHeight, mapGrid);
@@ -204,5 +222,42 @@ public class InputController : MonoBehaviour
         if (startToggle.isOn) return CellType.Start;
         if (endToggle.isOn) return CellType.End;
         return null;
+    }
+
+    private void OnSelectedCellTypeChanged(bool isOn)
+    {
+        if (isOn)
+        {
+            RestrictBrushSizeIfNeeded();
+        }
+    }
+
+    private void OnBrushSizeSliderValueChanged(float value)
+    {
+        RestrictBrushSizeIfNeeded();
+        brushSizeText.text = $"Brush Size: {brushSizeSlider.value}";
+    }
+
+    private void RestrictBrushSizeIfNeeded()
+    {
+        CellType? selectedType = GetSelectedCellType();
+        if (selectedType == CellType.Start || selectedType == CellType.End)
+        {
+            brushSizeSlider.value = 1;
+        }
+    }
+
+    private void OnReachabilityToggleValueChanged(bool isOn)
+    {
+        Reachability.reachableCells = new List<Vector2Int>();
+        Transform toggles = reachability.transform.GetChild(1);
+        for (int i = 0; i < toggles.childCount; i++)
+        {
+            Toggle toggle = toggles.GetChild(i).GetComponent<Toggle>();
+            if (toggle.isOn && i != 4)
+            {
+                Reachability.reachableCells.Add(Reachability.directions[i]);
+            }
+        }
     }
 }
