@@ -117,7 +117,7 @@ Material:
     - _GridLineWidth: 0.1
     - _GridThickness: 0.04
     - _HighlightThickness: 0.04
-    - _MapSizeSum: 17
+    - _MapSizeSum: 39
     - _Metallic: 0
     - _MinGridLineWidth: 0.0022
     - _OcclusionStrength: 1
