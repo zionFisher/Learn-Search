@@ -7,9 +7,9 @@ public static class DFSIterative
     public static List<Vector2Int> Search(Vector2Int start, Vector2Int end, CellType[,] cells)
     {
         // 初始化数据结构
-        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-        Stack<Vector2Int> stack = new Stack<Vector2Int>();
-        List<Vector2Int> path = new List<Vector2Int>();
+        HashSet<Vector2Int> visited = new();
+        Stack<Vector2Int> stack = new();
+        List<Vector2Int> path = new();
         bool found = false;
 
         // 将起点加入栈和已访问集合

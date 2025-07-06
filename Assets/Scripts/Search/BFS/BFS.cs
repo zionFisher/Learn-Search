@@ -7,9 +7,9 @@ public static class BFS
     public static List<Vector2Int> Search(Vector2Int start, Vector2Int end, CellType[,] cells)
     {
         // 初始化数据结构
-        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-        Queue<Vector2Int> queue = new Queue<Vector2Int>();
-        Dictionary<Vector2Int, Vector2Int> parent = new Dictionary<Vector2Int, Vector2Int>();
+        HashSet<Vector2Int> visited = new();
+        Queue<Vector2Int> queue = new();
+        Dictionary<Vector2Int, Vector2Int> parent = new();
         bool found = false;
 
         // 将起点加入队列和已访问集合
