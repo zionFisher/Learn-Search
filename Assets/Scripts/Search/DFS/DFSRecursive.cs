@@ -2,18 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DFSRecursive
+public static class DFSRecursive
 {
-    private HashSet<Vector2Int> visited;
-    private List<Vector2Int> path;
-    private CellType[,] cells;
-    private Vector2Int target;
-    private bool found;
+    private static HashSet<Vector2Int> visited;
+    private static List<Vector2Int> path;
+    private static CellType[,] cells;
+    private static Vector2Int target;
+    private static bool found;
 
-    public List<Vector2Int> Search(Vector2Int start, Vector2Int end, CellType[,] cells)
+    public static List<Vector2Int> Search(Vector2Int start, Vector2Int end, CellType[,] cells)
     {
-        // 初始化成员变量
-        this.cells = cells;
+        // 初始化静态变量
+        DFSRecursive.cells = cells;
         target = end;
         visited = new HashSet<Vector2Int>();
         path = new List<Vector2Int>();
@@ -26,7 +26,7 @@ public class DFSRecursive
         return found ? path : new List<Vector2Int>();
     }
 
-    private void DFS(Vector2Int current)
+    private static void DFS(Vector2Int current)
     {
         // 如果已经找到路径或当前位置已访问，直接返回
         if (found || visited.Contains(current))
@@ -74,7 +74,7 @@ public class DFSRecursive
             path.RemoveAt(path.Count - 1);
     }
 
-    private bool IsValidPosition(int x, int y)
+    private static bool IsValidPosition(int x, int y)
     {
         return x >= 0 && x < cells.GetLength(0) && y >= 0 && y < cells.GetLength(1);
     }

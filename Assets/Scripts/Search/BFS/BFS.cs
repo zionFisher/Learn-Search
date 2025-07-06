@@ -2,24 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class DFSIterative
+public static class BFS
 {
     public static List<Vector2Int> Search(Vector2Int start, Vector2Int end, CellType[,] cells)
     {
         // 初始化数据结构
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-        Stack<Vector2Int> stack = new Stack<Vector2Int>();
-        List<Vector2Int> path = new List<Vector2Int>();
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        Dictionary<Vector2Int, Vector2Int> parent = new Dictionary<Vector2Int, Vector2Int>();
         bool found = false;
 
-        // 将起点加入栈和已访问集合
-        stack.Push(start);
+        // 将起点加入队列和已访问集合
+        queue.Enqueue(start);
         visited.Add(start);
-        path.Add(start);
+        parent[start] = start; // 起点的父节点是自己
 
-        while (stack.Count > 0 && !found)
+        while (queue.Count > 0 && !found)
         {
-            Vector2Int current = stack.Peek(); // 只查看栈顶，不弹出
+            Vector2Int current = queue.Dequeue();
 
             // 如果到达目标位置，标记为找到
             if (current == end)
@@ -32,9 +32,7 @@ public static class DFSIterative
             int x = Mathf.RoundToInt(current.x);
             int y = Mathf.RoundToInt(current.y);
 
-            bool hasUnvisitedNeighbor = false;
-
-            // 遍历所有可能的移动方向（与递归版本保持相同顺序）
+            // 遍历所有可能的移动方向
             foreach (Vector2Int dir in Reachability.reachableCells)
             {
                 // 计算新位置
@@ -48,28 +46,40 @@ public static class DFSIterative
                     cells[newX, newY] != CellType.None &&
                     !visited.Contains(next))
                 {
-                    // 将新位置加入栈和已访问集合
-                    stack.Push(next);
+                    // 将新位置加入队列和已访问集合
+                    queue.Enqueue(next);
                     visited.Add(next);
-                    path.Add(next);
-                    hasUnvisitedNeighbor = true;
-                    break; // 找到一个未访问的邻居就停止，模拟递归的深度优先
-                }
-            }
-
-            // 如果没有未访问的邻居，回溯（弹出栈顶元素并从路径中移除）
-            if (!hasUnvisitedNeighbor)
-            {
-                stack.Pop();
-                if (path.Count > 0)
-                {
-                    path.RemoveAt(path.Count - 1);
+                    parent[next] = current; // 记录父节点用于重建路径
                 }
             }
         }
 
-        // 如果找到路径，返回路径，否则返回空列表
-        return found ? path : new List<Vector2Int>();
+        // 如果找到路径，重建路径
+        if (found)
+        {
+            return ReconstructPath(start, end, parent);
+        }
+
+        // 否则返回空列表
+        return new List<Vector2Int>();
+    }
+
+    private static List<Vector2Int> ReconstructPath(Vector2Int start, Vector2Int end, Dictionary<Vector2Int, Vector2Int> parent)
+    {
+        List<Vector2Int> path = new List<Vector2Int>();
+        Vector2Int current = end;
+
+        // 从终点回溯到起点
+        while (current != start)
+        {
+            path.Add(current);
+            current = parent[current];
+        }
+        path.Add(start);
+
+        // 反转路径，使其从起点到终点
+        path.Reverse();
+        return path;
     }
 
     private static bool IsValidPosition(int x, int y, CellType[,] cells)
