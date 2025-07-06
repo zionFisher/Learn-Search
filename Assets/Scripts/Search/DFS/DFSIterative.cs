@@ -8,37 +8,33 @@ public class DFSIterative
     {
         // 初始化数据结构
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-        Dictionary<Vector2Int, Vector2Int> parent = new Dictionary<Vector2Int, Vector2Int>();
         Stack<Vector2Int> stack = new Stack<Vector2Int>();
         List<Vector2Int> path = new List<Vector2Int>();
+        bool found = false;
 
         // 将起点加入栈和已访问集合
         stack.Push(start);
         visited.Add(start);
+        path.Add(start);
 
-        while (stack.Count > 0)
+        while (stack.Count > 0 && !found)
         {
-            Vector2Int current = stack.Pop();
+            Vector2Int current = stack.Peek(); // 只查看栈顶，不弹出
 
-            // 如果到达目标位置，构建路径并返回
+            // 如果到达目标位置，标记为找到
             if (current == end)
             {
-                // 回溯构建路径
-                Vector2Int temp = current;
-                while (parent.ContainsKey(temp))
-                {
-                    path.Insert(0, temp);
-                    temp = parent[temp];
-                }
-                path.Insert(0, start);
-                return path;
+                found = true;
+                break;
             }
 
             // 获取当前位置的整数坐标
             int x = Mathf.RoundToInt(current.x);
             int y = Mathf.RoundToInt(current.y);
 
-            // 遍历所有可能的移动方向
+            bool hasUnvisitedNeighbor = false;
+
+            // 遍历所有可能的移动方向（与递归版本保持相同顺序）
             foreach (Vector2Int dir in Reachability.reachableCells)
             {
                 // 计算新位置
@@ -55,13 +51,25 @@ public class DFSIterative
                     // 将新位置加入栈和已访问集合
                     stack.Push(next);
                     visited.Add(next);
-                    parent[next] = current;
+                    path.Add(next);
+                    hasUnvisitedNeighbor = true;
+                    break; // 找到一个未访问的邻居就停止，模拟递归的深度优先
+                }
+            }
+
+            // 如果没有未访问的邻居，回溯（弹出栈顶元素并从路径中移除）
+            if (!hasUnvisitedNeighbor)
+            {
+                stack.Pop();
+                if (path.Count > 0)
+                {
+                    path.RemoveAt(path.Count - 1);
                 }
             }
         }
 
-        // 如果没有找到路径，返回空列表
-        return new List<Vector2Int>();
+        // 如果找到路径，返回路径，否则返回空列表
+        return found ? path : new List<Vector2Int>();
     }
 
     private bool IsValidPosition(int x, int y, CellType[,] cells)
